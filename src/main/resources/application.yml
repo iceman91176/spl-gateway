@@ -2,15 +2,8 @@ spring:
   cloud:
    gateway:
     routes:
-      - id: testroute
-        uri: http://httpbin.org:80
-        predicates:
-         - Path=/get
-        filters:
-         - AddRequestHeader=foo,bar
-         - ServicePlanetFilter=foo,bar
       - id: spl
-        uri: https://smdb-dev.workspace.witcom.de/serviceplanet/remote/service
+        uri: ${SPL_BASEURL}/serviceplanet/remote/service
         predicates:
          - Path=/spl/**
         filters:

@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -23,14 +24,25 @@ import de.witcom.splgateway.swagger.model.UserLoginDto;
 @Service
 public class SessionManager {
 
-	@Value("${splUri}")
-	private String splUri;
+	//@Value("${SPL_BASEURL}")
+	@Value("${SPL_BASEURL}")
+	private String splBaseUrl;
+	@Value("${SPL_USER}")
+	private String splUser;
+	@Value("${SPL_PASSWORD}")
+	private String splPassword;
+	@Value("${SPL_TENANT:#{null}}")
+	private String splTenant;
+
 
 	Logger logger = LoggerFactory.getLogger(SessionManager.class);
 
 	private String sessionId = null;
 
+
+    @Scheduled(cron = "0 0/5 * * * ?")
 	private void refreshSession() {
+	    logger.info("Refreshing session with SPL");
 		if (sessionId == null) {
 			this.login();
 			return;
@@ -44,7 +56,7 @@ public class SessionManager {
 
 	private boolean isSessionActive() {
 		// logger.debug("Check if Session {} is active",this.sessionId);
-		String url = splUri + "/serviceplanet/remote/service/v1/login/logged_in_user/active";
+		String url = splBaseUrl + "/serviceplanet/remote/service/v1/login/logged_in_user/active";
 		RestTemplate restTemplate = new RestTemplate();
 
 		HttpHeaders requestHeaders = new HttpHeaders();
@@ -69,7 +81,7 @@ public class SessionManager {
 
 	private void login() {
 
-		String url = splUri + "/serviceplanet/remote/service/v1/login/authenticate";
+		String url = splBaseUrl + "/serviceplanet/remote/service/v1/login/authenticate";
 
 		RestTemplate restTemplate = new RestTemplate();
 
@@ -78,8 +90,12 @@ public class SessionManager {
 
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
 		//toDo get from environment
-		map.add("loginname", "auser");
-		map.add("password", "apassword");
+		map.add("loginname", splUser);
+		map.add("password", splPassword);
+		map.add("allowDropOldestSession","true");
+		if (splTenant!=null){
+		    map.add("tenant", splTenant);
+		}
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map,
 				requestHeaders);
 		try {
@@ -113,7 +129,10 @@ public class SessionManager {
 	}
 
 	public String getSessionId() {
-		refreshSession();
+	    if(sessionId==null){
+	      this.login();  
+	    }
+		//refreshSession();
 		return sessionId;
 	}
 

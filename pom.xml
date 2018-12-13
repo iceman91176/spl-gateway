@@ -11,7 +11,7 @@
 	</parent>
 	<groupId>de.witcom</groupId>
 	<artifactId>spl-gateway</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.1.0</version>
 	<name>spl-gateway</name>
 	<description>Gateway Service for FNT Serviceplanet</description>
 
@@ -22,6 +22,8 @@
 		<yaml.file>${project.basedir}/src/main/resources/splapi.yaml</yaml.file>
 		<generated-sources-path>${project.build.directory}/generated-sources</generated-sources-path>
 		<generated-sources-java-path>main/java</generated-sources-java-path>
+		<docker.plugin.version>1.4.9</docker.plugin.version>
+		<docker.repository>registry.witcom-dev.services:443/spl-gateway</docker.repository>
 	</properties>
 
 	<dependencies>
@@ -78,6 +80,27 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<plugin>
+              <groupId>com.spotify</groupId>
+              <artifactId>dockerfile-maven-plugin</artifactId>
+              <version>${docker.plugin.version}</version>
+              <executions>
+                <execution>
+                  <id>default</id>
+                  <goals>
+                    <goal>build</goal>
+                    <goal>push</goal>
+                  </goals>
+                </execution>
+              </executions>
+              <configuration>
+                <repository>${docker.repository}</repository>
+                <tag>${project.version}</tag>
+                <buildArgs>
+                  <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+                </buildArgs>
+              </configuration>
+            </plugin>
 			<plugin>
 				<groupId>io.swagger</groupId>
 				<artifactId>swagger-codegen-maven-plugin</artifactId>

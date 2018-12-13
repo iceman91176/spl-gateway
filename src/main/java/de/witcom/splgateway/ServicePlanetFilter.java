@@ -28,7 +28,7 @@ public class ServicePlanetFilter extends AbstractGatewayFilterFactory{
 		
 		return (exchange, chain) -> {
             //ServerHttpRequest request = exchange.getRequest();
-			logger.debug("in the filter"); 
+            //Hier koennte man eienn mechanismus einbauen, der auf basis eines headers einen refresh forciert
 			
 			String sessionId = sessionManager.getSessionId();
             if (sessionId!=null) {
