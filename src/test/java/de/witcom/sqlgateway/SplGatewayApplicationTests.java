@@ -13,7 +13,6 @@ public class SplGatewayApplicationTests {
 	
 
 	@Test
-	@Ignore
 	public void contextLoads() {
 		
 	}

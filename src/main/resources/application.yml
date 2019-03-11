@@ -1,11 +1,31 @@
 spring:
   cloud:
    gateway:
+    globalcors:
+      cors-configurations:
+        '[/**]':
+         allowedOrigins: "*"          
     routes:
       - id: spl
         uri: ${SPL_BASEURL}/serviceplanet/remote/service
         predicates:
          - Path=/spl/**
         filters:
+         - KeyCloakFilter=requiredRole,service_read
          - ServicePlanetFilter
-         - RewritePath=/spl/(?<segment>.*), /serviceplanet/remote/service/$\{segment}         
+         - RewritePath=/spl/(?<segment>.*), /serviceplanet/remote/service/$\{segment}
+      - id: keycloakfilter
+        uri: http://httpbin.org:80
+        predicates:
+         - Path=/get
+        filters:
+         - KeyCloakFilter=requiredRole,service_read
+           
+         
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    #org.springframework.http.server.reactive: DEBUG
+    #org.springframework.web.reactive: DEBUG
+    #reactor.ipc.netty: DEBUG
+    #reactor.netty: DEBUG                      
